@@ -1,2 +1,2 @@
 # Fitness_Manager_System
-实训项目
+健身房管理系统
