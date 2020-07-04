@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+	<context:property-placeholder
+		location="classpath:jdbc.properties" />
+	<!-- annotation-driven要放在default-servlet-handler之前 -->
+	<mvc:annotation-driven>
+	</mvc:annotation-driven>
+	<!-- 告知springmvc启用服务器提供的默认的servlet -->
+	<mvc:default-servlet-handler />
+	<!-- spring扫描包结构 以及其子包 并将指定的类创建对象加入spring管理 -->
+	<context:component-scan base-package="com"></context:component-scan>
+
+	<!-- 视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/page/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	<!-- 配置数据源,任意数据源都可以 -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	<!-- 通过数据源创建sql会话 -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 注入数据库连接池 ref是引用上面bean中id的值 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 配置MyBaties全局配置文件：mybatis-config.xml -->
+		<property name="configLocation" value="classpath:mybatis.xml"></property>
+		<!-- 扫描sql配置文件：mapper需要的xml文件 -->
+		<property name="mapperLocations"
+			value="classpath:mapper/*.xml"></property>
+	</bean>
+	<!-- 配置扫描Dao接口包，动态实现Dao接口，注入到spring容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 注入sqlSessionFactory -->
+		<property name="sqlSessionFactoryBeanName"
+			value="sqlSessionFactory"></property>
+		<!-- 给出需要扫描Dao接口包 -->
+		<property name="basePackage" value="com.st.dao"></property>
+	</bean>
+
+
+</beans>

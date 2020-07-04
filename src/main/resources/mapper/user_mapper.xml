@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间应该是对应接口的包名+接口名 -->
+<mapper namespace="com.st.dao.UserDao">
+<!-- SQL语句 -->
+<select id="test" resultType="string">
+	select now()
+</select>
+	<select id="getuserCount" resultType="int" parameterType="map">
+		select count(user_id) from fit_user where user_id like '%${check}%' or
+		user_loginname like '%${check}%' or
+		user_realname like '%${check}%'
+	</select>
+	<select id="user_list" resultType="map" parameterType="map">
+		select * from fit_user where user_id like '%${check}%' or
+		user_loginname like '%${check}%' or
+		user_realname like '%${check}%'
+		limit ${start},${limit}
+	</select>
+	<delete id="user_del"  parameterType="map">
+		delete from fit_user where user_id=#{user_id}
+	</delete>
+	
+	<delete id="user_del_more"  parameterType="map">
+		delete from fit_user where user_id in (${userids})
+	</delete>
+	
+	<insert id="user_save" parameterType="map">
+		insert into fit_user(user_id,user_loginname,user_loginpass,user_realname,user_sex,user_tel,user_state)
+		values(#{uuid},#{User_loginname},#{User_loginpass},#{User_realname},#{User_sex},#{User_tel},#{user_state})
+	</insert>
+	
+	<update id="user_update" parameterType="map">
+		update fit_user set 
+		user_realname=#{User_realname},user_sex=#{User_sex},user_tel=#{User_tel},user_state=#{user_state}
+		where user_id=#{User_id}
+	</update>
+	
+	<select	id="user_login" resultType="map" parameterType="map">
+	select * from fit_user where user_loginname=#{login_name}
+	</select>
+	
+	<select	id="cust_login" resultType="map" parameterType="map">
+	select * from fit_customer where cust_loginname=#{login_name}
+	</select>
+	
+	<update id="editpass" parameterType="map">
+		update fit_user set user_loginpass=#{newpass} where user_id=#{user_id}
+	</update>
+	
+	<select id="confirmusername" resultType="int" parameterType="map">
+		select count(user_id) from fit_user where user_loginname = #{User_loginname}
+	</select>
+</mapper>

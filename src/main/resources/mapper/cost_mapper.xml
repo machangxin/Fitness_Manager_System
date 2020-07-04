@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间应该是对应接口的包名+接口名 -->
+<mapper namespace="com.st.dao.costDao">
+	<select id="costlog_list" parameterType="map" resultType="map">
+		select cost_time,cost_money,cost_info  from fit_cost 
+		where cost_cust_id=#{cust_id} order by cost_time desc
+	</select>
+	<select id="getcostCount" resultType="int" parameterType="map">
+		select count(cost_id) 
+		from fit_cost a left join fit_customer b on a.cost_cust_id=b.cust_id
+		where cust_realname like '%${check}%' or
+		cust_loginname like '%${check}%' or
+		cost_time like '%${check}%' or
+		cost_info like '%${check}%'
+	</select>
+	<select id="cost_list" resultType="map" parameterType="map">
+		select * ,DATE_FORMAT(cost_time,'%Y-%m-%d %H:%i:%s') as time 
+		from fit_cost a left join fit_customer b on a.cost_cust_id=b.cust_id
+		where cust_realname like '%${check}%' or
+		cust_loginname like '%${check}%' or
+		cost_time like '%${check}%' or
+		cost_info like '%${check}%'
+		limit ${start},${limit}
+	</select>
+	<select id="getprecostCount" resultType="int" parameterType="map">
+		select count(cost_id) 
+		from fit_cost a left join fit_customer b on a.cost_cust_id=b.cust_id
+		where (cust_realname like '%${check}%' or
+		cust_loginname like '%${check}%' or
+		cost_time like '%${check}%'  or
+		cost_info like '%${check}%') and cost_cust_id=#{cust_id}
+	</select>
+	<select id="precost_list" resultType="map" parameterType="map">
+		select * ,DATE_FORMAT(cost_time,'%Y-%m-%d %H:%i:%s') as time 
+		from fit_cost a left join fit_customer b on a.cost_cust_id=b.cust_id
+		where (cust_realname like '%${check}%' or
+		cust_loginname like '%${check}%' or
+		cost_time like '%${check}%' or
+		cost_info like '%${check}%') and cost_cust_id=#{cust_id}
+		limit ${start},${limit}
+	</select>
+	<insert id="customer_cost" parameterType="map">
+	insert into fit_cost(cost_id,cost_cust_id,cost_time,cost_money,cost_info)
+	values(#{uuid},#{cust_id},now(),#{cost_money},#{cost_info})  
+	</insert>
+	<insert id="costlog_save" parameterType="map">
+	insert into fit_cost(cost_id,cost_cust_id,cost_time,cost_money,cost_info)
+	values(#{uuid},(SELECT cust_id FROM fit_customer where cust_loginname=#{Customer_loginname})
+	,now(),#{cost_money},#{cost_info})  
+	</insert>
+	<delete id="cost_del" parameterType="map">
+		delete from fit_cost where cost_id=#{cost_id}
+	</delete>
+	<update id="costlog_update" parameterType="map">
+		update fit_cost set
+		cost_money=#{cost_money},cost_info=#{cost_info}
+		where cost_id=#{cost_id}
+	</update>
+	<delete id="costlog_del_more" parameterType="map">
+		delete from
+		fit_cost where cost_id in (${costids})
+	</delete>
+		<select id="month_sales" resultType="map">
+	SELECT DATE_FORMAT(cost_time, '%b') AS month,SUM(cost_money) AS buy FROM fit_cost
+	WHERE YEAR (cost_time) = 2020 GROUP BY MONTH (cost_time)
+	order BY MONTH (cost_time)
+	</select>
+	<select id="pre_sales" resultType="map">
+		SELECT sum(b.cost_money) as value,a.cust_loginname as name  
+		from fit_customer as a LEFT JOIN fit_cost as b
+		on a.cust_id = b.cost_cust_id GROUP BY a.cust_id
+		ORDER BY value desc
+		limit 0,10
+	</select>
+	<select id="month_cost" resultType="map">
+	SELECT DATE_FORMAT(cost_time, '%b') AS month,SUM(cost_money) AS buy FROM fit_cost
+	WHERE YEAR (cost_time) = 2020 and cost_cust_id=#{cust_id}
+	GROUP BY MONTH (cost_time)
+	order BY MONTH (cost_time)
+	</select>
+</mapper>

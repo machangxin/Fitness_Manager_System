@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间应该是对应接口的包名+接口名 -->
+<mapper namespace="com.st.dao.CustomerDao">
+<sql id = "customer_select_where">
+		cust_id like '%${check}%' or
+		cust_loginname like '%${check}%' or
+		cust_realname like '%${check}%' or
+		cust_tel like '%${check}%' or
+		cust_sex like '%${check}%' or
+		cust_addr like '%${check}%'
+	</sql>
+	<!-- SQL语句 -->
+	<select id="test" resultType="string">
+		select now()
+	</select>
+	<!-- 客户查询-->
+	<select id="getCustomerCount" resultType="int"
+		parameterType="map">
+		select count(cust_id) from fit_customer where <include refid="customer_select_where"></include>
+	</select>
+	<select id="customer_list" resultType="map" parameterType="map">
+		select * from fit_customer where <include refid="customer_select_where"></include> limit ${start},${limit}
+	</select>
+	<delete id="customer_del" parameterType="map">
+		delete from fit_customer where cust_id=#{cust_id}
+	</delete>
+	<update id="customer_update" parameterType="map">
+		update fit_customer
+		set
+		cust_tel=#{Customer_tel},cust_addr=#{Customer_addr},cust_realname=#{Customer_realname},cust_sex=#{Customer_sex}
+		where cust_id=#{Customer_id}
+	</update>
+	<delete id="cust_del_more" parameterType="map">
+		delete from
+		fit_customer where cust_id in (${custids})
+	</delete>
+		<insert id="customer_save" parameterType="map">
+		insert into
+		fit_customer(cust_id,cust_loginname,cust_tel,cust_addr,cust_realname,cust_loginpass,cust_sex)
+		values(#{uuid},#{Customer_loginname},#{Customer_tel},#{Customer_addr},#{Customer_realname},#{User_loginpass},#{Customer_sex})
+	</insert>
+	<select id="confirmcustname" resultType="int" parameterType="map">
+		select count(cust_id) from fit_customer where cust_loginname = #{Customer_loginname}
+	</select>
+	<update id="custeditpass" parameterType="map">
+		update fit_customer set cust_loginpass=#{newpass} where cust_id=#{user_id}
+	</update>
+	
+</mapper>
